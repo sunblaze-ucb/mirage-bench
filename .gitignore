@@ -2,3 +2,5 @@
 /inference_logs
 /verified_results
 /verify_logs
+/processed_results
+*.py[cod]

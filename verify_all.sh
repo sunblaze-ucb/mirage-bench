@@ -19,9 +19,10 @@ TYPE_SCENARIOS["repetitive_7"]="webarena workarena swebench"
 TYPE_SCENARIOS["popup"]="webarena osworld"
 TYPE_SCENARIOS["underspecified"]="webarena osworld"
 TYPE_SCENARIOS["unachievable"]="webarena workarena osworld"
-TYPE_SCENARIOS["error_feedback"]="webarena workarena swebench"
+TYPE_SCENARIOS["unachievable_easier"]="workarena"
+TYPE_SCENARIOS["error_feedback"]="swebench webarena workarena"
 
-MODELS=("gpt-4o-mini-2024-07-18" "claude-3-5-sonnet-20240620" "gemini-2.0-flash" "gemini-2.5-flash" "deepseek-chat" "deepseek-reasoner" "Llama-3.3-70B-Instruct" "Llama-3.1-70B-Instruct" "Qwen2.5-7B-Instruct" "Qwen2.5-32B-Instruct" "Qwen2.5-72B-Instruct")
+MODELS=("gpt-4o-mini-2024-07-18" "claude-3-5-sonnet-20240620" "claude-3-7-sonnet-20250219" "gemini-2.0-flash" "gemini-2.5-flash" "deepseek-chat" "deepseek-reasoner" "Llama-3.3-70B-Instruct" "Llama-3.1-70B-Instruct" "Qwen2.5-7B-Instruct" "Qwen2.5-32B-Instruct" "Qwen2.5-72B-Instruct")
 
 # Execute verification tasks
 for TYPE in "${!TYPE_SCENARIOS[@]}"; do
@@ -31,7 +32,7 @@ for TYPE in "${!TYPE_SCENARIOS[@]}"; do
       echo "Running verification: type=$TYPE, scenario=$SCENARIO, model=$MODEL" | tee -a "$LOG_DIR/verify_all.log"
       
       # Run verification command
-      python ./script/verifier.py --type "$TYPE" --scenario "$SCENARIO" --model "$MODEL" 2>&1 | tee -a "$LOG_DIR/verify_$TYPE_$SCENARIO_$MODEL.log"
+      python ./script/verifier.py --type "$TYPE" --scenario "$SCENARIO" --model "$MODEL" 2>&1 | tee -a "$LOG_DIR/verify_${TYPE}_${SCENARIO}_${MODEL}.log"
       
       # Check execution status
       if [ $? -eq 0 ]; then

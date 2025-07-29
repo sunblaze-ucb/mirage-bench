@@ -88,7 +88,7 @@ def calculate_hallucination_rates(
 
 
 def save_results_to_json(
-    results, output_path="../processed_results/hallucination_rate.json"
+    results, output_path="./processed_results/hallucination_rate.json"
 ):
     """
     Save the calculated results to a JSON file.
@@ -116,7 +116,7 @@ def save_results_to_json(
 
 def main():
     hallucination_rates = calculate_hallucination_rates(
-        base_directory="../verified_results"
+        base_directory="./verified_results"
     )
 
     # Print results

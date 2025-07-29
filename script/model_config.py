@@ -6,6 +6,7 @@ Contains configuration information for all supported models and client initializ
 import os
 from typing import Dict, Any, Optional, List, Union
 from openai import OpenAI
+from anthropic import Anthropic
 
 # Default API configuration
 DEFAULT_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -13,6 +14,9 @@ DEFAULT_BASE_URL = os.getenv("OPENAI_BASE_URL")
 
 LOCAL_API_KEY = os.getenv("LOCAL_API_KEY")
 LOCAL_BASE_URL = os.getenv("LOCAL_BASE_URL")
+
+CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
+CLAUDE_BASE_URL = os.getenv("CLAUDE_BASE_URL")
 
 # Model configuration dictionary
 MODEL_CONFIGS = {
@@ -46,8 +50,16 @@ MODEL_CONFIGS = {
         "temperature": 0,
         "max_tokens": 2048,
         "supports_system_prompt": True,
-        "api_key": DEFAULT_API_KEY,
-        "base_url": DEFAULT_BASE_URL,
+        "api_key": CLAUDE_API_KEY,
+        "base_url": CLAUDE_BASE_URL,
+    },
+    "claude-3-7-sonnet-20250219": {
+        "model_id": "claude-3-7-sonnet-latest",
+        "temperature": 0,
+        "max_tokens": 512,
+        "supports_system_prompt": True,
+        "api_key": CLAUDE_API_KEY,
+        "base_url": CLAUDE_BASE_URL,
     },
     "gemini-2.0-flash": {
         "model_id": "gemini-2.0-flash",
@@ -129,6 +141,14 @@ MODEL_CONFIGS = {
         "api_key": LOCAL_API_KEY,
         "base_url": LOCAL_BASE_URL,
     },
+    "grok-4-0709": {
+        "model_id": "grok-4-0709",
+        "temperature": 0,
+        "max_tokens": 2048,
+        "supports_system_prompt": True,
+        "api_key": DEFAULT_API_KEY,
+        "base_url": DEFAULT_BASE_URL,
+    },
 }
 
 
@@ -155,7 +175,7 @@ def get_model_config(model_name: str) -> Dict[str, Any]:
 
 def get_client(model_name: str) -> OpenAI:
     """
-    Get OpenAI client instance for the specified model
+
 
     Args:
         model_name: Model name for retrieving the corresponding API configuration

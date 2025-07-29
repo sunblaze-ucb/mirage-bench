@@ -47,7 +47,7 @@ def setup_logger(log_dir: str, log_level: int = logging.INFO) -> logging.Logger:
 
 
 def main():
-    logger = setup_logger(log_dir="../logs")
+    logger = setup_logger(log_dir="../verify_logs")
 
     parser = argparse.ArgumentParser(
         description="Verify hallucination in LLM agent in different domains and tasks, route to different evaluators"
@@ -110,6 +110,9 @@ def main():
             verifier = VerifyUnexpectedTransitionOSWorld(
                 logger, force_verify=args.force
             )
+        else:
+            logger.error(f"Unsupported scenario '{args.scenario}' for type '{args.type}'")
+            return
 
     elif args.type == "users_questions":
         if args.scenario == "theagentcompany":
@@ -124,6 +127,10 @@ def main():
             )
 
             verifier = VerifyUsersQuestionsTaubench(logger, force_verify=args.force)
+        else:
+            logger.error(f"Unsupported scenario '{args.scenario}' for type '{args.type}'")
+            return
+
     elif args.type == "misleading":
         if args.scenario == "swebench":
             from verifier import (
@@ -135,6 +142,10 @@ def main():
             from verifier import VerifyMisleadingWebarena
 
             verifier = VerifyMisleadingWebarena(logger, force_verify=args.force)
+        else:
+            logger.error(f"Unsupported scenario '{args.scenario}' for type '{args.type}'")
+            return
+
     elif args.type == "repetitive_4" or args.type == "repetitive_7":
         if args.scenario == "webarena" or args.scenario == "workarena":
             from verifier import VerifyRepetitive
@@ -148,11 +159,19 @@ def main():
             from verifier import VerifyRepetitiveSWEbench
 
             verifier = VerifyRepetitiveSWEbench(logger, force_verify=args.force)
+        else:
+            logger.error(f"Unsupported scenario '{args.scenario}' for type '{args.type}'")
+            return
+
     elif args.type == "popup":
         if args.scenario == "webarena" or args.scenario == "osworld":
             from verifier import VerifyPopup
 
             verifier = VerifyPopup(logger, force_verify=args.force)
+        else:
+            logger.error(f"Unsupported scenario '{args.scenario}' for type '{args.type}'")
+            return
+
     elif args.type == "underspecified":
         if args.scenario == "webarena":
             from verifier import VerifyUnderspecifiedWebarena
@@ -162,20 +181,19 @@ def main():
             from verifier import VerifyUnderspecifiedOSWorld
 
             verifier = VerifyUnderspecifiedOSWorld(logger, force_verify=args.force)
-    elif args.type == "misleading":
-        if args.scenario == "webarena":
-            from verifier import VerifyMisleadingWebarena
+        else:
+            logger.error(f"Unsupported scenario '{args.scenario}' for type '{args.type}'")
+            return
 
-            verifier = VerifyMisleadingWebarena(logger, force_verify=args.force)
-        elif args.scenario == "swebench":
-            from verifier import VerifyMisleadingSWEbench
-
-            verifier = VerifyMisleadingSWEbench(logger, force_verify=args.force)
     elif args.type == "unachievable" or args.type == "unachievable_easier":
         if args.scenario == "webarena" or args.scenario == "workarena":
             from verifier import VerifyUnachievableWebarena
 
             verifier = VerifyUnachievableWebarena(logger, force_verify=args.force)
+        else:
+            logger.error(f"Unsupported scenario '{args.scenario}' for type '{args.type}'")
+            return
+
     elif args.type == "error_feedback":
         if args.scenario == "webarena" or args.scenario == "workarena":
             from verifier import VerifyErroneousWebarena
@@ -185,6 +203,10 @@ def main():
             from verifier import VerifyErroneousSWEbench
 
             verifier = VerifyErroneousSWEbench(logger, force_verify=args.force)
+        else:
+            logger.error(f"Unsupported scenario '{args.scenario}' for type '{args.type}'")
+            return
+
     else:
         logger.error(f"Unsupported verification type: {args.type}")
         return

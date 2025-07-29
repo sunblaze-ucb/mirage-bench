@@ -4,16 +4,15 @@
 import json
 import numpy as np
 import collections
-
-# working directory
 import os
 
+# Set working directory to script location
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def load_data(file_path):
     """
-    Load utility score data from JSON file.
+    Load data from a JSON file.
 
     Args:
         file_path (str): Path to the JSON file
@@ -27,10 +26,10 @@ def load_data(file_path):
 
 def compute_weighted_average(data_items):
     """
-    Compute weighted average of utility scores.
+    Compute weighted average of scores.
 
     Args:
-        data_items (list): List of (utility_score, sample_count) tuples
+        data_items (list): List of (score, sample_count) tuples
 
     Returns:
         tuple: (weighted_average, total_samples)
@@ -49,10 +48,11 @@ def compute_weighted_average(data_items):
 
 def unify_categories(data, metric_name):
     """
-    Unify categories according to specified mapping.
+    Unify categories according to the specified mapping.
 
     Args:
-        data (dict): Original utility score data
+        data (dict): Original score data
+        metric_name (str): The metric to unify (e.g., "utility_score" or "hallucination_rate")
 
     Returns:
         dict: Unified category data
@@ -84,7 +84,7 @@ def unify_categories(data, metric_name):
             )
 
         weighted_score, total_samples = compute_weighted_average(unachievable_items)
-        unified_data["Unachievable Tasks"][model] = {
+        unified_data["Unachievable Goal"][model] = {
             metric_name: weighted_score,
             "sample_count": total_samples,
         }
@@ -153,7 +153,7 @@ def unify_categories(data, metric_name):
     # 5. Rename users_questions to "User Queries Outside Task Boundary"
     for model in data["users_questions"]:
         models.add(model)
-        unified_data["User Queries Outside Task Boundary"][model] = data[
+        unified_data["Out of Boundary Queries"][model] = data[
             "users_questions"
         ][model]
 
@@ -165,7 +165,7 @@ def unify_categories(data, metric_name):
     # 7. Keep unexpected_transition as is
     for model in data["unexpected_transition"]:
         models.add(model)
-        unified_data["Unexpected Transition"][model] = data["unexpected_transition"][
+        unified_data["Unexpected Environmental Transition"][model] = data["unexpected_transition"][
             model
         ]
 
@@ -191,7 +191,7 @@ def unify_categories(data, metric_name):
 
 def save_unified_data(unified_data, output_file):
     """
-    Save unified data to JSON file.
+    Save unified data to a JSON file.
 
     Args:
         unified_data (dict): Unified data
@@ -207,12 +207,13 @@ def print_summary(unified_data, metric_name):
 
     Args:
         unified_data (dict): Unified data
+        metric_name (str): The metric to print
     """
-    print("统一后的类别:")
+    print("Unified Categories:")
     for category in unified_data:
-        print(f"\n类别: {category}")
+        print(f"\nCategory: {category}")
 
-        # 按照效用分数排序模型
+        # Sort models by metric score
         sorted_models = sorted(
             unified_data[category].items(),
             key=lambda x: x[1][metric_name],
@@ -221,12 +222,12 @@ def print_summary(unified_data, metric_name):
 
         for model, data in sorted_models:
             print(
-                f"  {model}: {data[metric_name]:.4f} (样本数: {data['sample_count']})"
+                f"  {model}: {data[metric_name]:.4f} (Sample count: {data['sample_count']})"
             )
 
 
 def main():
-    # 输入和输出文件路径
+    # Input and output file paths
     utility_score_input_file = "../processed_results/utility_score.json"
     hallucination_rate_input_file = "../processed_results/hallucination_rate.json"
     unified_utility_score_output_file = (
@@ -236,22 +237,22 @@ def main():
         "../processed_results/unified_hallucination_rate.json"
     )
 
-    # 加载数据
+    # Load data
     utility_score_data = load_data(utility_score_input_file)
     hallucination_rate_data = load_data(hallucination_rate_input_file)
 
-    # 统一类别
+    # Unify categories
     unified_utility_score_data = unify_categories(utility_score_data, "utility_score")
     unified_hallucination_rate_data = unify_categories(
         hallucination_rate_data, "hallucination_rate"
     )
 
-    # 保存统一后的数据
+    # Save unified data
     save_unified_data(unified_utility_score_data, unified_utility_score_output_file)
     save_unified_data(
         unified_hallucination_rate_data, unified_hallucination_rate_output_file
     )
-    # 打印摘要
+    # Print summary
     print("-" * 100)
     print("Unified Utility Score:")
     print_summary(unified_utility_score_data, "utility_score")
@@ -259,8 +260,8 @@ def main():
     print("Unified Hallucination Rate:")
     print_summary(unified_hallucination_rate_data, "hallucination_rate")
     print("-" * 100)
-    print(f"\n统一后的数据已保存到 {unified_utility_score_output_file}")
-    print(f"\n统一后的数据已保存到 {unified_hallucination_rate_output_file}")
+    print(f"\nUnified utility score data saved to {unified_utility_score_output_file}")
+    print(f"\nUnified hallucination rate data saved to {unified_hallucination_rate_output_file}")
 
 
 if __name__ == "__main__":

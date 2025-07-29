@@ -81,7 +81,7 @@ def calculate_utility_scores(
 
 
 def save_results_to_json(
-    results, output_path="../processed_results_temp1/utility_score.json"
+    results, output_path="./processed_results_temp1/utility_score.json"
 ):
     """
     Save the calculated results to a JSON file.
@@ -109,7 +109,7 @@ def save_results_to_json(
 
 def main():
     utility_scores = calculate_utility_scores(
-        base_directory="../verified_results"
+        base_directory="./verified_results"
     )
 
     # Print results

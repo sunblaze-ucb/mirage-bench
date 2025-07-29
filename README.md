@@ -1,5 +1,4 @@
-# MIRAGE-Bench: LLM Agent is Hallucinating and
-Where to Find Them
+# MIRAGE-Bench: LLM Agent is Hallucinating and Where to Find Them
 
 [![arXiv](https://img.shields.io/badge/arXiv-preprint-b31b1b.svg)]()
 

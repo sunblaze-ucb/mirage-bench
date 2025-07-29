@@ -1,0 +1,239 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "bash",
+      "description": "runs the given command directly in bash",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "The bash command to execute."
+          }
+        },
+        "required": [
+          "command"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "goto",
+      "description": "moves the window to show <line_number>",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "line_number": {
+            "type": "integer",
+            "description": "the line number to move the window to"
+          }
+        },
+        "required": [
+          "line_number"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "open",
+      "description": "opens the file at the given path in the editor. If line_number is provided, the window will be moved to include that line",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "the path to the file to open"
+          },
+          "line_number": {
+            "type": "integer",
+            "description": "the line number to move the window to (optional)"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "create",
+      "description": "creates and opens a new file with the given name",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "description": "the name of the file to create"
+          }
+        },
+        "required": [
+          "filename"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "scroll_up",
+      "description": "moves the window up {WINDOW} lines",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "scroll_down",
+      "description": "moves the window down {WINDOW} lines",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "find_file",
+      "description": "finds all files with the given name or pattern in dir. If dir is not provided, searches in the current directory",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "file_name": {
+            "type": "string",
+            "description": "the name of the file or pattern to search for. supports shell-style wildcards (e.g. *.py)"
+          },
+          "dir": {
+            "type": "string",
+            "description": "the directory to search in (optional)"
+          }
+        },
+        "required": [
+          "file_name"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "search_dir",
+      "description": "searches for search_term in all files in dir. If dir is not provided, searches in the current directory",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "search_term": {
+            "type": "string",
+            "description": "the term to search for"
+          },
+          "dir": {
+            "type": "string",
+            "description": "the directory to search in (optional)"
+          }
+        },
+        "required": [
+          "search_term"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "search_file",
+      "description": "searches for search_term in file. If file is not provided, searches in the current open file",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "search_term": {
+            "type": "string",
+            "description": "the term to search for"
+          },
+          "file": {
+            "type": "string",
+            "description": "the file to search in (optional)"
+          }
+        },
+        "required": [
+          "search_term"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "edit",
+      "description": "Replaces lines <start_line> through <end_line> (inclusive) with the given text in the open file.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "start_line": {
+            "type": "integer",
+            "description": "the line number to start the edit at"
+          },
+          "end_line": {
+            "type": "integer",
+            "description": "the line number to end the edit at (inclusive)"
+          },
+          "replacement_text": {
+            "type": "string",
+            "description": "the text to replace the current selection with, terminated by end_of_edit"
+          }
+        },
+        "required": [
+          "start_line",
+          "end_line",
+          "replacement_text"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "insert",
+      "description": "Insert <text> at the end of the currently opened file or after <line> if specified.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "the text to insert"
+          },
+          "line": {
+            "type": "integer",
+            "description": "the line number to insert the text after (optional)"
+          }
+        },
+        "required": [
+          "text"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "submit",
+      "description": "submits the current file",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  }
+]
