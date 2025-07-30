@@ -1,6 +1,6 @@
 # MIRAGE-Bench: LLM Agent is Hallucinating and Where to Find Them
 
-[![arXiv](https://img.shields.io/badge/arXiv-preprint-b31b1b.svg)]()
+[![arXiv](https://img.shields.io/badge/arXiv-preprint-b31b1b.svg)](https://arxiv.org/abs/2507.21017)
 
 **Authors:** Weichen Zhang, Yiyou Sun, Pohao Huang, Jiayue Pu, Heyue Lin, Dawn Song
 
@@ -52,6 +52,17 @@ python ./script/unify_results.py
 
 If you use MIRAGE in your research, please cite:
 
+```bibtex
+@misc{zhang2025miragebenchllmagenthallucinating,
+      title={MIRAGE-Bench: LLM Agent is Hallucinating and Where to Find Them}, 
+      author={Weichen Zhang and Yiyou Sun and Pohao Huang and Jiayue Pu and Heyue Lin and Dawn Song},
+      year={2025},
+      eprint={2507.21017},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2507.21017}, 
+}
+```
 
 ## 📄 License
 
