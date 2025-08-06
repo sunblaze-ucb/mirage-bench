@@ -203,3 +203,123 @@ def get_all_settings(
             settings.append({"risk_setting": risk_setting, "scenario": scenario})
 
     return settings
+
+def get_verifier(type: str, scenario: str, logger: logging.Logger, force: bool = False):
+    if type == "unexpected_transition":
+        if scenario == "theagentcompany":
+            from verifier import VerifyUnexpectedTransitionTAC
+
+            verifier = VerifyUnexpectedTransitionTAC(logger, force_verify=force)
+
+        elif scenario == "webarena":
+            from verifier import VerifyUnexpectedTransitionWebarena
+
+            verifier = VerifyUnexpectedTransitionWebarena(
+                logger, force_verify=force
+            )
+        elif scenario == "osworld":
+            from verifier import VerifyUnexpectedTransitionOSWorld
+
+            verifier = VerifyUnexpectedTransitionOSWorld(
+                logger, force_verify=force
+            )
+        else:
+            logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
+            return
+
+    elif type == "users_questions":
+        if scenario == "theagentcompany":
+            from verifier import (
+                VerifyUsersQuestionsTAC,
+            )
+
+            verifier = VerifyUsersQuestionsTAC(logger, force_verify=force)
+        elif scenario == "taubench":
+            from verifier import (
+                VerifyUsersQuestionsTaubench,
+            )
+
+            verifier = VerifyUsersQuestionsTaubench(logger, force_verify=force)
+        else:
+            logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
+            return
+
+    elif type == "misleading":
+        if scenario == "swebench":
+            from verifier import (
+                VerifyMisleadingSWEbench,
+            )
+
+            verifier = VerifyMisleadingSWEbench(logger, force_verify=force)
+        elif scenario == "webarena":
+            from verifier import VerifyMisleadingWebarena
+
+            verifier = VerifyMisleadingWebarena(logger, force_verify=force)
+        else:
+            logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
+            return
+
+    elif type == "repetitive_4" or type == "repetitive_7":
+        if scenario == "webarena" or scenario == "workarena":
+            from verifier import VerifyRepetitive
+
+            verifier = VerifyRepetitive(logger, force_verify=force)
+        elif scenario == "osworld":
+            from verifier import VerifyRepetitiveOSWorld
+
+            verifier = VerifyRepetitiveOSWorld(logger, force_verify=force)
+        elif scenario == "swebench":
+            from verifier import VerifyRepetitiveSWEbench
+
+            verifier = VerifyRepetitiveSWEbench(logger, force_verify=force)
+        else:
+            logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
+            return
+
+    elif type == "popup":
+        if scenario == "webarena" or scenario == "osworld":
+            from verifier import VerifyPopup
+
+            verifier = VerifyPopup(logger, force_verify=force)
+        else:
+            logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
+            return
+
+    elif type == "underspecified":
+        if scenario == "webarena":
+            from verifier import VerifyUnderspecifiedWebarena
+
+            verifier = VerifyUnderspecifiedWebarena(logger, force_verify=force)
+        elif scenario == "osworld":
+            from verifier import VerifyUnderspecifiedOSWorld
+
+            verifier = VerifyUnderspecifiedOSWorld(logger, force_verify=force)
+        else:
+            logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
+            return
+
+    elif type == "unachievable" or type == "unachievable_easier":
+        if scenario == "webarena" or scenario == "workarena":
+            from verifier import VerifyUnachievableWebarena
+
+            verifier = VerifyUnachievableWebarena(logger, force_verify=force)
+        else:
+            logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
+            return
+
+    elif type == "error_feedback":
+        if scenario == "webarena" or scenario == "workarena":
+            from verifier import VerifyErroneousWebarena
+
+            verifier = VerifyErroneousWebarena(logger, force_verify=force)
+        elif scenario == "swebench":
+            from verifier import VerifyErroneousSWEbench
+
+            verifier = VerifyErroneousSWEbench(logger, force_verify=force)
+        else:
+            logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
+            return
+
+    else:
+        logger.error(f"Unsupported verification type: {type}")
+        raise ValueError(f"Unsupported verification type: {type}")
