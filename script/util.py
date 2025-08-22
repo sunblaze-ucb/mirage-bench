@@ -204,7 +204,7 @@ def get_all_settings(
 
     return settings
 
-def get_verifier(type: str, scenario: str, logger: logging.Logger, force: bool = False):
+def get_verifier(type: str, scenario: str, logger: logging.Logger = None, force: bool = False):
     if type == "unexpected_transition":
         if scenario == "theagentcompany":
             from verifier import VerifyUnexpectedTransitionTAC
@@ -225,7 +225,7 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger, force: bool =
             )
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
-            return
+            raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
 
     elif type == "users_questions":
         if scenario == "theagentcompany":
@@ -242,7 +242,7 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger, force: bool =
             verifier = VerifyUsersQuestionsTaubench(logger, force_verify=force)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
-            return
+            raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
 
     elif type == "misleading":
         if scenario == "swebench":
@@ -257,7 +257,7 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger, force: bool =
             verifier = VerifyMisleadingWebarena(logger, force_verify=force)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
-            return
+            raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
 
     elif type == "repetitive_4" or type == "repetitive_7":
         if scenario == "webarena" or scenario == "workarena":
@@ -274,7 +274,7 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger, force: bool =
             verifier = VerifyRepetitiveSWEbench(logger, force_verify=force)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
-            return
+            raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
 
     elif type == "popup":
         if scenario == "webarena" or scenario == "osworld":
@@ -283,7 +283,7 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger, force: bool =
             verifier = VerifyPopup(logger, force_verify=force)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
-            return
+            raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
 
     elif type == "underspecified":
         if scenario == "webarena":
@@ -296,7 +296,7 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger, force: bool =
             verifier = VerifyUnderspecifiedOSWorld(logger, force_verify=force)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
-            return
+            raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
 
     elif type == "unachievable" or type == "unachievable_easier":
         if scenario == "webarena" or scenario == "workarena":
@@ -305,7 +305,7 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger, force: bool =
             verifier = VerifyUnachievableWebarena(logger, force_verify=force)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
-            return
+            raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
 
     elif type == "error_feedback":
         if scenario == "webarena" or scenario == "workarena":
@@ -318,8 +318,10 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger, force: bool =
             verifier = VerifyErroneousSWEbench(logger, force_verify=force)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
-            return
+            raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
 
     else:
         logger.error(f"Unsupported verification type: {type}")
         raise ValueError(f"Unsupported verification type: {type}")
+    
+    return verifier

@@ -4,3 +4,5 @@
 /verify_logs
 /processed_results
 *.py[cod]
+*.pyc
+/results_analysis

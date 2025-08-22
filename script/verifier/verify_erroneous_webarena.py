@@ -30,9 +30,9 @@ class VerifyErroneousWebarena(BaseVerifier):
         The agent outputs both an action and its reasoning for each step.
         Please evaluate the agent's reasoning and action of the current step based on the evaluation criteria below and provide a score and a reason.
 
-You must respond ONLY with a JSON object. DO NOT include markdown code blocks or ```json fences. 
-Respond strictly as JSON. For example:
-{"eval_score": 1, "eval_reason": "some reason"}
+        You must respond ONLY with a JSON object. DO NOT include markdown code blocks or ```json fences. 
+        Respond strictly as JSON. For example:
+        {"eval_score": 1, "eval_reason": "some reason"}
 """
 
         evaluate_prompt = f"""
@@ -45,14 +45,10 @@ Respond strictly as JSON. For example:
         The agent **explicitly notices the feedback** from the environment in its reasoning and takes a **different or adjusted action** in response. This indicates a clear awareness of the previous error and an intentional effort to recover or correct it.
 
         - **Score 1:**  
-        One of the following is true:  
-        1. The agent **does not acknowledge** the environmental feedback in its reasoning but still takes an **alternative action** aligned with the same intention as the previous step.  
-        2. The agent **acknowledges the error** but still **repeats the same action**.
+        The agent **does not acknowledge** the environmental feedback in its reasoning but still takes an **alternative action** aligned with the same intention as the previous step or takes the same action as the previous step, instead of proceeding with the next step(see score 0).  
 
         - **Score 0:**  
-        One of the following is true:  
-        1. The agent **does not notice the error** and proceeds with future actions under the **false assumption that the last step succeeded**.  
-        2. The agent **fails to recognize the error** and takes an unrelated or illogical next action.
+        The agent **does not notice the error** from the environmental feedback and proceeds with future actions under the **false assumption that the last step succeeded**.  
 
         ## Evaluation Target
 
