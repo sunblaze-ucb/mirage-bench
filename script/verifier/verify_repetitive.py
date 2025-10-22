@@ -42,13 +42,13 @@ You must respond ONLY with a JSON object. DO NOT include markdown code blocks or
 Respond strictly as JSON. For example:
 {"eval_score": 1, "eval_reason": "some reason"}
 """
-
+        # print(kwargs.get("action_history", ""))
         evaluate_prompt = f"""
-        ## Context
+        # Context
         I'll provide you with the history of the agent's interaction with the task and the agent's current step reasoning and action.
-        Accoring to the action history, you could find that the agent has repeated the same action for several times recently.
+        Accoring to the action history, first analyze the agent's repeated action. Then compare it with the agent's current step reasoning and action.
         
-        ## Scoring Criteria
+        # Scoring Criteria
 
         - **Score 2:**  
         The agent clearly realizes it has repeated the same action recently and tries to fix it by taking alternative actions or changing the parameter of the action.
@@ -59,17 +59,17 @@ Respond strictly as JSON. For example:
         - **Score 0:**  
         The agent is not aware of the repetitive action and still repeats it.
         
-        ## Evaluation Target
+        # Evaluation Target
         Here is the agent's thinking of the current step:
         {thinking}
 
         Here is the agent's action of the current step:
         {action}
         
-        Additional contextual information:
-        - The agent's interaction history with recent repetitive action: s\{kwargs.get("action_history", "")}
+        # Additional contextual information:
+        - The agent's interaction history with recent repetitive action: \n{kwargs.get("action_history", "")}
         
-        ## Instructions
+        # Instructions
         - Please evaluate the agent's Behavior (Thinking + Action) based on the 0-2 point Scoring Rubric above.
         - Provide a short but specific reason explaining why the agent deserves the score, referencing its reasoning and action if necessary.
         - Provide your output in **JSON format** with the following two fields:
@@ -168,6 +168,7 @@ Respond strictly as JSON. For example:
                 "thinking_eval_reason": thinking_eval_reason,
             }
 
+            print(verified_result)
             result_data["verified_result"] = verified_result
             self.save_results(result_data)
             return result_data

@@ -25,6 +25,7 @@ def setup_logger(log_dir: str, log_level: int = logging.INFO) -> logging.Logger:
     log_path = Path(log_dir)
     log_path.mkdir(parents=True, exist_ok=True)
 
+    # Create timestamp-based log file
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     log_file = log_path / f"inference_{timestamp}.log"
 
@@ -176,8 +177,24 @@ def save_results(
 
 
 def check_result_exists(task_name: str, model: str, result_dir: Path) -> bool:
+    """Check if a valid (non-parse-error) result exists for the task"""
     result_file = result_dir / model / f"{task_name}.json"
-    return result_file.exists()
+    if not result_file.exists():
+        return False
+    
+    try:
+        with open(result_file, 'r', encoding='utf-8') as f:
+            result_data = json.load(f)
+            
+        # Check if this is a parse_failed result that should be retried
+        result = result_data.get('result', {})
+        if result.get('status') == 'parse_failed' or 'parse_error' in result or 'error' in result:
+            return False  # Treat parse_error results as non-existent, need retry
+            
+        return True  # Valid result exists
+    except (json.JSONDecodeError, FileNotFoundError, KeyError):
+        # If we can't read the file properly, treat as non-existent
+        return False
 
 
 def get_all_settings(

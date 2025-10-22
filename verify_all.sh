@@ -23,6 +23,7 @@ TYPE_SCENARIOS["unachievable_easier"]="workarena"
 TYPE_SCENARIOS["error_feedback"]="swebench webarena workarena"
 
 MODELS=("gpt-4o-mini-2024-07-18" "claude-3-5-sonnet-20240620" "claude-3-7-sonnet-20250219" "gemini-2.0-flash" "gemini-2.5-flash" "deepseek-chat" "deepseek-reasoner" "Llama-3.3-70B-Instruct" "Llama-3.1-70B-Instruct" "Qwen2.5-7B-Instruct" "Qwen2.5-32B-Instruct" "Qwen2.5-72B-Instruct")
+# MODELS=("gpt-4o-mini-2024-07-18" "gpt-4o-2024-11-20" "claude-3-5-sonnet-20240620" "claude-3-7-sonnet-20250219" "gemini-2.0-flash" "gemini-2.5-flash" "deepseek-chat" "deepseek-reasoner" "Llama-3.3-70B-Instruct" "Llama-3.1-70B-Instruct" "Qwen2.5-7B-Instruct" "Qwen2.5-32B-Instruct" "Qwen2.5-72B-Instruct" "Qwen2.5-VL-7B-Instruct" "Qwen2.5-7B-ARPO" "UI-TARS-1.5-7B")
 
 # Execute verification tasks
 for TYPE in "${!TYPE_SCENARIOS[@]}"; do

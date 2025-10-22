@@ -49,8 +49,9 @@ def query_model(
     try:
         client = get_client(model_name)
     except Exception as e:
-        logger.error(f"Error getting client for model {model_name}: {e}")
-        return {"model": model_name, "error": str(e)}
+        logger.error(f"Failed to initialize client for model {model_name}: {e}")
+        logger.error("Script will exit due to client initialization failure")
+        raise
 
     logger.debug(f"Number of messages: {len(messages)}")
 
@@ -117,16 +118,29 @@ def query_model(
                     continue
                 else:
                     logger.warning(
-                        f"Tag parsing failed after {max_parse_retries} attempts"
+                        f"Tag parsing failed after {max_parse_retries} attempts for model {model_name}, skipping this task"
                     )
                     return {
                         "model": model_name,
                         "completion": last_response,
                         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
                         "parse_error": str(e),
+                        "status": "parse_failed",
                     }
 
         except Exception as e:
+            error_str = str(e)
+            # Check for fatal errors that should cause script to exit
+            if any(fatal_indicator in error_str.lower() for fatal_indicator in [
+                "does not exist", "notfounderror", "error code: 404",
+                "unauthorized", "error code: 401", "invalid api key",
+                "permission denied", "error code: 403"
+            ]):
+                logger.error(f"Fatal error with model {model_name}: {e}")
+                logger.error("This is a fatal error that requires immediate attention")
+                logger.error("Script will exit to prevent saving incorrect results")
+                raise
+            
             if retry < max_retries - 1:
                 sleep_time = 2**retry  # Exponential backoff
                 logger.warning(
@@ -134,12 +148,9 @@ def query_model(
                 )
                 time.sleep(sleep_time)
             else:
-                logger.error(f"Failed to request model {model_name}: {e}")
-                return {
-                    "model": model_name,
-                    "error": str(e),
-                    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
-                }
+                logger.error(f"Failed to request model {model_name} after {max_retries} retries: {e}")
+                logger.error("Script will exit due to repeated API failures")
+                raise
 
 
 def process_task(
@@ -175,6 +186,16 @@ def process_task(
             max_parse_retries=max_parse_retries,
         )
 
+        # Handle parse failure case
+        if model_result.get("status") == "parse_failed":
+            logger.warning(f"Task {task_name} skipped due to parsing failure")
+            result["status"] = "parse_failed"
+            result["error"] = model_result.get("parse_error")
+            # Still save the result for debugging purposes
+            result_file = save_results(task_data, model_result, setting_result_dir, logger)
+            result["result_file"] = str(result_file)
+            return result
+
         result_file = save_results(task_data, model_result, setting_result_dir, logger)
 
         if "error" not in model_result:
@@ -205,7 +226,7 @@ def process_setting(
     debug: bool = False,
     max_parse_retries: int = 3,
     parallel: int = 20,
-) -> None:
+) -> Dict[str, Dict[str, int]]:
     dataset_path = f"../dataset_all/{risk_setting}/{scenario}"
 
     dataset_dir = Path(dataset_path)
@@ -234,11 +255,14 @@ def process_setting(
         with open(SWE_TOOLS_PATH, "r", encoding="utf-8") as f:
             swe_tools = json.load(f)
 
+    model_stats = {}
+    
     for model in models:
         logger.info(f"\nTesting model: {model}")
         skipped_tasks = 0
         new_tasks = 0
         error_tasks = 0
+        parse_failed_tasks = 0
         model_start_time = time.time()
 
         try:
@@ -273,11 +297,28 @@ def process_setting(
                             skipped_tasks += 1
                         elif result["status"] == "success":
                             new_tasks += 1
+                        elif result["status"] == "parse_failed":
+                            parse_failed_tasks += 1
                         else:
                             error_tasks += 1
                     except Exception as exc:
-                        logger.error(f"Task {task_name} exception: {exc}")
-                        error_tasks += 1
+                        error_str = str(exc)
+                        # Check for fatal errors that should terminate the script
+                        if any(fatal_indicator in error_str.lower() for fatal_indicator in [
+                            "does not exist", "notfounderror", "error code: 404",
+                            "unauthorized", "error code: 401", "invalid api key",
+                            "permission denied", "error code: 403",
+                            "failed to initialize client"
+                        ]):
+                            logger.error(f"Fatal error in task {task_name}: {exc}")
+                            logger.error("Terminating all tasks and exiting script due to fatal error")
+                            # Cancel all pending futures
+                            for pending_future in future_to_task:
+                                pending_future.cancel()
+                            raise exc
+                        else:
+                            logger.error(f"Task {task_name} exception: {exc}")
+                            error_tasks += 1
 
         except KeyboardInterrupt:
             logger.warning("User interrupted, exiting early")
@@ -286,12 +327,24 @@ def process_setting(
             logger.error(f"Error testing model {model}: {e}")
 
         model_time = time.time() - model_start_time
-        total_tasks = skipped_tasks + new_tasks + error_tasks
+        total_tasks = skipped_tasks + new_tasks + error_tasks + parse_failed_tasks
         logger.info(f"Model {model} completed: {total_tasks} tasks processed")
         logger.info(
-            f"- Skipped: {skipped_tasks}, Success: {new_tasks}, Errors: {error_tasks}"
+            f"- Skipped: {skipped_tasks}, Success: {new_tasks}, Errors: {error_tasks}, Parse Failed: {parse_failed_tasks}"
         )
         logger.info(f"- Time: {model_time:.2f} seconds")
+        
+        # Store stats for this model
+        model_stats[model] = {
+            "skipped": skipped_tasks,
+            "success": new_tasks,
+            "errors": error_tasks,
+            "parse_failed": parse_failed_tasks,
+            "total": total_tasks,
+            "time": model_time,
+        }
+    
+    return model_stats
 
 
 def parse_args():
@@ -370,6 +423,7 @@ def main():
 
     log_level = getattr(logging, args.log_level)
     log_dir = Path(args.log_dir)
+
     logger = setup_logger(log_dir, log_level)
 
     # result_dir = Path(args.result_dir)
@@ -392,12 +446,19 @@ def main():
             return
 
         logger.info(f"Found {len(settings)} settings to process")
+        
+        # Initialize overall stats for each model
+        overall_model_stats = {model: {
+            "skipped": 0, "success": 0, "errors": 0, "parse_failed": 0, 
+            "total": 0, "time": 0.0, "settings_count": 0
+        } for model in args.models}
+        
         for setting in settings:
             risk_setting = setting["risk_setting"]
             scenario = setting["scenario"]
 
             try:
-                process_setting(
+                setting_stats = process_setting(
                     risk_setting=risk_setting,
                     scenario=scenario,
                     models=args.models,
@@ -408,14 +469,42 @@ def main():
                     max_parse_retries=args.max_parse_retries,
                     parallel=args.parallel,
                 )
+                
+                # Accumulate stats for each model
+                for model, stats in setting_stats.items():
+                    overall_model_stats[model]["skipped"] += stats["skipped"]
+                    overall_model_stats[model]["success"] += stats["success"]
+                    overall_model_stats[model]["errors"] += stats["errors"]
+                    overall_model_stats[model]["parse_failed"] += stats["parse_failed"]
+                    overall_model_stats[model]["total"] += stats["total"]
+                    overall_model_stats[model]["time"] += stats["time"]
+                    overall_model_stats[model]["settings_count"] += 1
+                    
             except KeyboardInterrupt:
                 logger.warning("User interrupted, ending processing")
                 break
             except Exception as e:
                 logger.error(f"Error processing {risk_setting}/{scenario}: {e}")
                 continue
+        
+        # Print overall statistics for each model
+        logger.info("\n" + "=" * 60)
+        logger.info("OVERALL STATISTICS ACROSS ALL SETTINGS")
+        logger.info("=" * 60)
+        
+        for model in args.models:
+            stats = overall_model_stats[model]
+            if stats["settings_count"] > 0:
+                logger.info(f"\nModel: {model}")
+                logger.info(f"- Settings processed: {stats['settings_count']}")
+                logger.info(f"- Total tasks: {stats['total']}")
+                logger.info(f"- Skipped: {stats['skipped']}, Success: {stats['success']}, Errors: {stats['errors']}, Parse Failed: {stats['parse_failed']}")
+                logger.info(f"- Total time: {stats['time']:.2f} seconds")
+                logger.info(f"- Average time per setting: {stats['time']/stats['settings_count']:.2f} seconds")
+            else:
+                logger.info(f"\nModel: {model} - No settings processed")
     else:
-        process_setting(
+        setting_stats = process_setting(
             risk_setting=args.risk_setting,
             scenario=args.scenario,
             models=args.models,
@@ -426,6 +515,20 @@ def main():
             max_parse_retries=args.max_parse_retries,
             parallel=args.parallel,
         )
+        
+        # Print overall statistics for single setting mode
+        logger.info("\n" + "=" * 60)
+        logger.info(f"STATISTICS FOR {args.risk_setting}/{args.scenario}")
+        logger.info("=" * 60)
+        
+        for model in args.models:
+            if model in setting_stats:
+                stats = setting_stats[model]
+                logger.info(f"\nModel: {model}")
+                logger.info(f"- Total tasks: {stats['total']}")
+                logger.info(f"- Skipped: {stats['skipped']}, Success: {stats['success']}, Errors: {stats['errors']}, Parse Failed: {stats['parse_failed']}")
+                logger.info(f"- Time: {stats['time']:.2f} seconds")
+
 
     logger.info("\nAll inference tasks complete!")
 
@@ -437,3 +540,4 @@ if __name__ == "__main__":
         print("\nUser interrupted, program exiting")
     except Exception as e:
         print(f"Error occurred during execution: {e}")
+        exit(1)

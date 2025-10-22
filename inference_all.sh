@@ -10,6 +10,7 @@ START_TIME=$(date +"%Y-%m-%d %H:%M:%S")
 echo "Inference tasks started: $START_TIME" | tee -a "$LOG_DIR/inference_all.log"
 
 MODELS=("gpt-4o-mini-2024-07-18" "claude-3-5-sonnet-20240620" “claude-3-7-sonnet-20250219” "gemini-2.0-flash" "gemini-2.5-flash" "deepseek-chat" "deepseek-reasoner" "Llama-3.3-70B-Instruct" "Llama-3.1-70B-Instruct" "Qwen2.5-7B-Instruct" "Qwen2.5-32B-Instruct" "Qwen2.5-72B-Instruct")
+# MODELS=("gpt-4o-mini-2024-07-18" "gpt-oss-120b" "claude-3-5-sonnet-20240620" “claude-3-7-sonnet-20250219” "gemini-2.0-flash" "gemini-2.5-flash" "deepseek-chat" "deepseek-reasoner" "Llama-3.3-70B-Instruct" "Llama-3.1-70B-Instruct" "Llama-3.1-8B-Instruct" "Qwen2.5-7B-Instruct" "webrl-llama-3.1-8b" "Qwen2.5-32B-Instruct" "Qwen2.5-72B-Instruct" "Qwen2.5-VL-7B-Instruct" "UI-TARS-1.5-7B" "Qwen2.5-7B-ARPO" "Qwen3-30B-A3B-Instruct-2507")
 
 for MODEL in "${MODELS[@]}"; do
     echo "=======================================" | tee -a "$LOG_DIR/inference_all.log"

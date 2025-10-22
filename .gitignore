@@ -6,3 +6,5 @@
 *.py[cod]
 *.pyc
 /results_analysis
+script/inference_logs
+.vscode

@@ -131,21 +131,85 @@ class BaseVerifier(ABC):
 
     def load_inference_results(self, results_dir: str, scenario: str) -> None:
         """
-        Load inference results from the given directory.
+        Load inference results from the given directory, filtering out invalid results.
 
         Args:
             results_dir: Path to the directory containing result files
         """
         self.logger.info(f"Loading inference results from {results_dir}")
         results = []
+        skipped_results = 0
+        total_files = 0
+        
         for file in os.listdir(results_dir):
             if file.endswith(".json") and scenario in file:
-                with open(os.path.join(results_dir, file), "r") as f:
-                    data = json.load(f)
+                total_files += 1
+                try:
+                    with open(os.path.join(results_dir, file), "r") as f:
+                        data = json.load(f)
+                    
+                    # Check if this result should be filtered out
+                    if self._should_skip_result(data, file):
+                        skipped_results += 1
+                        continue
+                        
                     results.append(data)
+                    
+                except (json.JSONDecodeError, KeyError, FileNotFoundError) as e:
+                    self.logger.warning(f"Failed to load result file {file}: {e}")
+                    skipped_results += 1
+                    continue
 
         self.inference_results = results
-        self.logger.info(f"Loaded {len(results)} inference results")
+        self.logger.info(f"Loaded {len(results)} valid inference results")
+        if skipped_results > 0:
+            self.logger.info(f"Skipped {skipped_results} invalid results out of {total_files} total files")
+
+    def _should_skip_result(self, data: dict, filename: str) -> bool:
+        """
+        Check if a result should be skipped due to parsing errors or other issues.
+        
+        Args:
+            data: The loaded JSON data
+            filename: Name of the file being processed
+            
+        Returns:
+            True if the result should be skipped, False otherwise
+        """
+        try:
+            result = data.get('result', {})
+            
+            # Skip results with parse errors
+            if result.get('status') == 'parse_failed':
+                self.logger.debug(f"Skipping {filename}: parse failed")
+                return True
+                
+            if 'parse_error' in result:
+                self.logger.debug(f"Skipping {filename}: contains parse error")
+                return True
+                
+            # Skip results with errors (API errors, etc.)
+            if 'error' in result:
+                error_msg = str(result.get('error', '')).lower()
+                # Skip fatal errors but allow normal processing errors
+                if any(fatal_indicator in error_msg for fatal_indicator in [
+                    'does not exist', 'notfounderror', 'error code: 404',
+                    'unauthorized', 'error code: 401', 'invalid api key',
+                    'permission denied', 'error code: 403'
+                ]):
+                    self.logger.debug(f"Skipping {filename}: fatal error - {result.get('error')}")
+                    return True
+                    
+            # Skip results without proper completion content
+            if not result.get('completion') and not result.get('thinking') and not result.get('action'):
+                self.logger.debug(f"Skipping {filename}: missing completion content")
+                return True
+                
+            return False
+            
+        except Exception as e:
+            self.logger.warning(f"Error checking result {filename}: {e}")
+            return True  # Skip results that can't be properly checked
 
     def set_output_dir(self, output_dir: str) -> None:
         """

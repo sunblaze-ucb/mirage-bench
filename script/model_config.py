@@ -12,8 +12,8 @@ from anthropic import Anthropic
 DEFAULT_API_KEY = os.getenv("OPENAI_API_KEY")
 DEFAULT_BASE_URL = os.getenv("OPENAI_BASE_URL")
 
-LOCAL_API_KEY = os.getenv("LOCAL_API_KEY")
-LOCAL_BASE_URL = os.getenv("LOCAL_BASE_URL")
+LOCAL_API_KEY = ""
+LOCAL_BASE_URL = ""
 
 CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
 CLAUDE_BASE_URL = os.getenv("CLAUDE_BASE_URL")
@@ -39,6 +39,14 @@ MODEL_CONFIGS = {
     },
     "o4-mini-2025-04-16": {
         "model_id": "o4-mini-2025-04-16",
+        "temperature": 0,
+        "max_tokens": 2048,
+        "supports_system_prompt": True,
+        "api_key": DEFAULT_API_KEY,
+        "base_url": DEFAULT_BASE_URL,
+    },
+    "gpt-oss-120b": {
+        "model_id": "gpt-oss-120b",
         "temperature": 0,
         "max_tokens": 2048,
         "supports_system_prompt": True,
@@ -77,8 +85,8 @@ MODEL_CONFIGS = {
         "api_key": DEFAULT_API_KEY,
         "base_url": DEFAULT_BASE_URL,
     },
-    "gemini-2.5-pro-preview-05-06": {
-        "model_id": "gemini-2.5-pro-preview-05-06",
+    "gemini-2.5-pro": {
+        "model_id": "gemini-2.5-pro",
         "temperature": 0,
         "max_tokens": 2048,
         "supports_system_prompt": True,
@@ -117,8 +125,24 @@ MODEL_CONFIGS = {
         "api_key": LOCAL_API_KEY,
         "base_url": LOCAL_BASE_URL,
     },
+    "Llama-3.1-8B-Instruct": {
+        "model_id": "Llama-3.1-8B-Instruct",
+        "temperature": 0,
+        "max_tokens": 2048,
+        "supports_system_prompt": True,
+        "api_key": LOCAL_API_KEY,
+        "base_url": LOCAL_BASE_URL,
+    },
+    "webrl-llama-3.1-8b": {
+        "model_id": "webrl-llama-3.1-8b",
+        "temperature": 0,
+        "max_tokens": 2048,
+        "supports_system_prompt": True,
+        "api_key": LOCAL_API_KEY,
+        "base_url": LOCAL_BASE_URL,
+    },
     "Qwen2.5-7B-Instruct": {
-        "model_id": "qwen2.5-7b-instruct",
+        "model_id": "Qwen2.5-7B-Instruct",
         "temperature": 0,
         "max_tokens": 2048,
         "supports_system_prompt": True,
@@ -134,7 +158,39 @@ MODEL_CONFIGS = {
         "base_url": LOCAL_BASE_URL,
     },
     "Qwen2.5-72B-Instruct": {
-        "model_id": "qwen2.5-72b-instruct",
+        "model_id": "Qwen2.5-72B-Instruct",
+        "temperature": 0,
+        "max_tokens": 2048,
+        "supports_system_prompt": True,
+        "api_key": LOCAL_API_KEY,
+        "base_url": LOCAL_BASE_URL,
+    },
+    "Qwen2.5-VL-7B-Instruct": {
+        "model_id": "Qwen2.5-VL-7B-Instruct",
+        "temperature": 0,
+        "max_tokens": 2048,
+        "supports_system_prompt": True,
+        "api_key": LOCAL_API_KEY,
+        "base_url": LOCAL_BASE_URL,
+    },
+    "Qwen3-30B-A3B-Instruct-2507": {
+        "model_id": "Qwen3-30B-A3B-Instruct-2507",
+        "temperature": 0,
+        "max_tokens": 2048,
+        "supports_system_prompt": True,
+        "api_key": LOCAL_API_KEY,
+        "base_url": LOCAL_BASE_URL,
+    },
+    "UI-TARS-1.5-7B": {
+        "model_id": "UI-TARS-1.5-7B",
+        "temperature": 0,
+        "max_tokens": 2048,
+        "supports_system_prompt": True,
+        "api_key": LOCAL_API_KEY,
+        "base_url": LOCAL_BASE_URL,
+    },
+    "Qwen2.5-7B-ARPO": {
+        "model_id": "Qwen2.5-7B-ARPO",
         "temperature": 0,
         "max_tokens": 2048,
         "supports_system_prompt": True,
