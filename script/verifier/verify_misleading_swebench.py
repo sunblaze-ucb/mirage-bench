@@ -91,8 +91,8 @@ Goal Patch:
 Here is the agent's thinking of the current step:  
 {thinking}
 
-Here is the agent's action of the current step:  
-```json
+Here is the agent's thinking and action of the current step:  
+{thinking}\n```json
 {action_json_display}
 ```
 (Note: 'None/Missing' indicates the agent did not produce a specific action.)

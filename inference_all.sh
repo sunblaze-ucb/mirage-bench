@@ -9,8 +9,20 @@ mkdir -p "$LOG_DIR"
 START_TIME=$(date +"%Y-%m-%d %H:%M:%S")
 echo "Inference tasks started: $START_TIME" | tee -a "$LOG_DIR/inference_all.log"
 
-MODELS=("gpt-4o-mini-2024-07-18" "claude-3-5-sonnet-20240620" “claude-3-7-sonnet-20250219” "gemini-2.0-flash" "gemini-2.5-flash" "deepseek-chat" "deepseek-reasoner" "Llama-3.3-70B-Instruct" "Llama-3.1-70B-Instruct" "Qwen2.5-7B-Instruct" "Qwen2.5-32B-Instruct" "Qwen2.5-72B-Instruct")
+MODELS=("gpt-4o-mini-2024-07-18" "claude-3-5-sonnet-20240620" “claude-3-7-sonnet-20250219” "gemini-2.0-flash" "gemini-2.5-flash" "deepseek-chat" "deepseek-reasoner" "Llama-3.3-70B-Instruct" "Llama-3.1-70B-Instruct" "Qwen2.5-7B-Instruct" "Qwen2.5-32B-Instruct" "Qwen2.5-72B-Instruct" "claude-4-5-sonnet-20250929" "gemini-2.5-pro" "gpt-5-2025-08-07")
 # MODELS=("gpt-4o-mini-2024-07-18" "gpt-oss-120b" "claude-3-5-sonnet-20240620" “claude-3-7-sonnet-20250219” "gemini-2.0-flash" "gemini-2.5-flash" "deepseek-chat" "deepseek-reasoner" "Llama-3.3-70B-Instruct" "Llama-3.1-70B-Instruct" "Llama-3.1-8B-Instruct" "Qwen2.5-7B-Instruct" "webrl-llama-3.1-8b" "Qwen2.5-32B-Instruct" "Qwen2.5-72B-Instruct" "Qwen2.5-VL-7B-Instruct" "UI-TARS-1.5-7B" "Qwen2.5-7B-ARPO" "Qwen3-30B-A3B-Instruct-2507")
+
+# Run model connectivity test before inference
+echo "Running model connectivity test..." | tee -a "$LOG_DIR/inference_all.log"
+python ./script/test_model_connectivity.py "${MODELS[@]}" 2>&1 | tee -a "$LOG_DIR/inference_all.log"
+
+if [ $? -ne 0 ]; then
+    echo "❌ Model connectivity test failed. Aborting inference." | tee -a "$LOG_DIR/inference_all.log"
+    exit 1
+fi
+
+echo "✅ All models connected successfully. Starting inference..." | tee -a "$LOG_DIR/inference_all.log"
+echo "" | tee -a "$LOG_DIR/inference_all.log"
 
 for MODEL in "${MODELS[@]}"; do
     echo "=======================================" | tee -a "$LOG_DIR/inference_all.log"
@@ -40,4 +52,4 @@ HOURS=$((DURATION / 3600))
 MINUTES=$(((DURATION % 3600) / 60))
 SECONDS=$((DURATION % 60))
 
-echo "Total runtime: ${HOURS}h ${MINUTES}m ${SECONDS}s" | tee -a "$LOG_DIR/inference_all.log" 
+echo "Total runtime: ${HOURS}h ${MINUTES}m ${SECONDS}s" | tee -a "$LOG_DIR/inference_all.log"

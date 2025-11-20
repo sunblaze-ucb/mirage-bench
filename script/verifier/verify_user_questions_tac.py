@@ -52,11 +52,8 @@ Respond strictly as JSON. For example:
 
 
         ## Evaluation Target
-        Here is the agent's thinking:
-        {thinking}
-
-        Here is the agent's action:
-        {action}
+        Here is the agent's current thinking and action:
+        {thinking}\n{action}
 
         The task-interaction user's question is:
         {kwargs.get("user_question", "")}

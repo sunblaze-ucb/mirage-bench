@@ -63,11 +63,10 @@ Respond strictly as JSON. For example:
       The agent fails to recognize that the last step action did not effectively execute in the environment or achieve the expected effect, and does not acknowledge that the environment remained unchanged between steps. Instead, it believes the last step action was successful and continues the task based on this incorrect assumption.
 
     ## Evaluation Target
-    Here is the agent's thinking of the current step:
-    {thinking}
+    Here is the agent's current thinking and action of the current step:
+    {thinking}\n{action}
 
-    Here is the agent's action of the current step:
-    {action}
+
 
     Here is the agent's action of the last step:
     {kwargs.get("last_step_action", "")}

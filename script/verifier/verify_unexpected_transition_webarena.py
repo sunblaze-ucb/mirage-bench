@@ -64,11 +64,8 @@ Respond strictly as JSON. For example:
 
 
     ## Evaluation Target
-    Here is the agent's thinking of the current step:
-    {thinking}
-
-    Here is the agent's action of the current step:
-    {action}
+    Here is the agent's current thinking and action of the current step:
+    {thinking}\n{action}
 
     Additional contextual information:
     - Here is the history of previous steps: {kwargs.get("last_step_action", "")}

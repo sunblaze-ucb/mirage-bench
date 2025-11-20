@@ -5,6 +5,7 @@ Contains configuration information for all supported models and client initializ
 
 import os
 from typing import Dict, Any, Optional, List, Union
+import openai
 from openai import OpenAI
 from anthropic import Anthropic
 
@@ -18,6 +19,9 @@ LOCAL_BASE_URL = ""
 CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
 CLAUDE_BASE_URL = os.getenv("CLAUDE_BASE_URL")
 
+AZURE_API_KEY = os.getenv("AZURE_API_KEY")
+AZURE_BASE_URL = os.getenv("AZURE_BASE_URL")
+AZURE_API_VERSION = os.getenv("AZURE_API_VERSION")
 # Model configuration dictionary
 MODEL_CONFIGS = {
     # OpenAI models
@@ -28,6 +32,7 @@ MODEL_CONFIGS = {
         "supports_system_prompt": True,
         "api_key": DEFAULT_API_KEY,
         "base_url": DEFAULT_BASE_URL,
+        "client": "openai",
     },
     "gpt-4o-mini-2024-07-18": {
         "model_id": "gpt-4o-mini-2024-07-18",
@@ -36,6 +41,7 @@ MODEL_CONFIGS = {
         "supports_system_prompt": True,
         "api_key": DEFAULT_API_KEY,
         "base_url": DEFAULT_BASE_URL,
+        "client": "openai",
     },
     "o4-mini-2025-04-16": {
         "model_id": "o4-mini-2025-04-16",
@@ -44,6 +50,7 @@ MODEL_CONFIGS = {
         "supports_system_prompt": True,
         "api_key": DEFAULT_API_KEY,
         "base_url": DEFAULT_BASE_URL,
+        "client": "openai",
     },
     "gpt-oss-120b": {
         "model_id": "gpt-oss-120b",
@@ -52,6 +59,17 @@ MODEL_CONFIGS = {
         "supports_system_prompt": True,
         "api_key": DEFAULT_API_KEY,
         "base_url": DEFAULT_BASE_URL,
+        "client": "openai",
+    },
+    "gpt-5-2025-08-07": {
+        "model_id": "gpt-5",
+        "temperature": 1,
+        "max_tokens": 2048,
+        "supports_system_prompt": True,
+        "api_key": AZURE_API_KEY,
+        "base_url": AZURE_BASE_URL,
+        "api_version": AZURE_API_VERSION,
+        "client": "azureopenai",
     },
     "claude-3-5-sonnet-20240620": {
         "model_id": "claude-3-5-sonnet-20240620",
@@ -60,6 +78,7 @@ MODEL_CONFIGS = {
         "supports_system_prompt": True,
         "api_key": CLAUDE_API_KEY,
         "base_url": CLAUDE_BASE_URL,
+        "client": "openai",
     },
     "claude-3-7-sonnet-20250219": {
         "model_id": "claude-3-7-sonnet-latest",
@@ -68,6 +87,16 @@ MODEL_CONFIGS = {
         "supports_system_prompt": True,
         "api_key": CLAUDE_API_KEY,
         "base_url": CLAUDE_BASE_URL,
+        "client": "openai",
+    },
+    "claude-4-5-sonnet--20250929": {
+        "model_id": "claude-sonnet-4-5-20250929",
+        "temperature": 0,
+        "max_tokens": 2048,
+        "supports_system_prompt": True,
+        "api_key": CLAUDE_API_KEY,
+        "base_url": CLAUDE_BASE_URL,
+        "client": "openai",
     },
     "gemini-2.0-flash": {
         "model_id": "gemini-2.0-flash",
@@ -76,6 +105,7 @@ MODEL_CONFIGS = {
         "supports_system_prompt": True,
         "api_key": DEFAULT_API_KEY,
         "base_url": DEFAULT_BASE_URL,
+        "client": "openai",
     },
     "gemini-2.5-flash": {
         "model_id": "gemini-2.5-flash",
@@ -84,14 +114,17 @@ MODEL_CONFIGS = {
         "supports_system_prompt": True,
         "api_key": DEFAULT_API_KEY,
         "base_url": DEFAULT_BASE_URL,
+        "client": "openai",
     },
     "gemini-2.5-pro": {
         "model_id": "gemini-2.5-pro",
         "temperature": 0,
         "max_tokens": 2048,
         "supports_system_prompt": True,
-        "api_key": DEFAULT_API_KEY,
-        "base_url": DEFAULT_BASE_URL,
+        "api_key": AZURE_API_KEY,
+        "base_url": AZURE_BASE_URL,
+        "api_version": "2024-03-01-preview",
+        "client": "azureopenai",
     },
     "deepseek-chat": {
         "model_id": "deepseek-chat",
@@ -229,7 +262,7 @@ def get_model_config(model_name: str) -> Dict[str, Any]:
     return MODEL_CONFIGS[model_name]
 
 
-def get_client(model_name: str) -> OpenAI:
+def get_client(model_name: str) -> Union[OpenAI, openai.AzureOpenAI]:
     """
 
 
@@ -237,22 +270,38 @@ def get_client(model_name: str) -> OpenAI:
         model_name: Model name for retrieving the corresponding API configuration
 
     Returns:
-        OpenAI client instance
+        OpenAI or AzureOpenAI client instance
 
     Raises:
         EnvironmentError: If necessary API configuration is missing
     """
     # Get model configuration
     model_config = get_model_config(model_name)
-    api_key = model_config.get("api_key")
-    base_url = model_config.get("base_url")
+    client_type = model_config.get("client", "openai")
+    
+    if client_type == "azureopenai":
+        # AzureOpenAI specific configuration
+        base_url = model_config.get("base_url")
+        api_version = model_config.get("api_version")
+        ak = model_config.get("api_key")
+        
+        print(f"Model {model_name} using AzureOpenAI with endpoint: {base_url}")
+        return openai.AzureOpenAI(
+            azure_endpoint=base_url,
+            api_version=api_version,
+            api_key=ak,
+        )
+    else:
+        # Standard OpenAI client configuration
+        api_key = model_config.get("api_key")
+        base_url = model_config.get("base_url")
 
-    client_args = {}
-    client_args["base_url"] = base_url.strip()
-    print(f"Model {model_name} using API base URL: {base_url}")
+        client_args = {}
+        client_args["base_url"] = base_url.strip()
+        print(f"Model {model_name} using API base URL: {base_url}")
 
-    # Create client
-    return OpenAI(api_key=api_key, **client_args)
+        # Create client
+        return OpenAI(api_key=api_key, **client_args)
 
 
 def format_prompt(

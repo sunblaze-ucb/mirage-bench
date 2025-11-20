@@ -52,11 +52,7 @@ class VerifyErroneousWebarena(BaseVerifier):
 
         ## Evaluation Target
 
-        Here is the agent's thinking of the current step:  
-        {thinking}
-
-        Here is the agent's action of the current step:  
-        {action}
+        Here is the agent's thinking and action of the current step: {thinking}.\n\n{action}
 
         Additional contextual information:
         - Interaction history: {kwargs.get("action_history", "")}

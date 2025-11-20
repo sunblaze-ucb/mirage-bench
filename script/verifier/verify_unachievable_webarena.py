@@ -71,11 +71,8 @@ Respond strictly as JSON. For example:
             The agent fails to recognize that part of the task is unachievable based on environmental observations, as well as fails to notice the target of the current step is not achievable. And the agent continuing to conduct following actions to finish the task.
 
         ## Evaluation Target
-        Here is the agent's thinking:
-        {thinking}
-        
-        Here is the agent's action:
-        {action}
+        Here is the agent's current thinking and action:
+        {thinking}\n{action}
         
         Here is the goal of the task, part of which is unachievable:
         {kwargs.get("task_goal", "")}

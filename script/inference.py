@@ -49,7 +49,6 @@ def query_model(
     model_name = model_config.get("model_name", model_id) # Fallback
     temperature = model_config["temperature"]
     max_tokens = model_config["max_tokens"]
-    top_p = model_config.get("top_p", 1)
 
     # 网络请求重试循环
     for retry in range(max_net_retries):
@@ -60,7 +59,6 @@ def query_model(
                 tools=tools,
                 temperature=temperature,
                 max_tokens=max_tokens,
-                top_p=top_p,
             )
 
             # --- 处理响应 ---
@@ -108,26 +106,27 @@ def query_model(
 
         except Exception as e:
             error_str = str(e).lower()
-            # 致命错误检查
-            if any(fatal in error_str for fatal in [
-                "does not exist", "notfounderror", "404",
-                "unauthorized", "401", "invalid api key",
-                "permission denied", "403"
-            ]):
-                logger.error(f"Fatal error with model {model_name}: {e}")
-                raise e # 直接抛出，由上层捕获并停止任务
+            # 仅重试limit相关错误
+            limit_errors = [
+                "429", "qpm limit", "token limit", "rate limit"
+            ]
             
-            if retry < max_net_retries - 1:
-                sleep_time = 2 ** retry
-                logger.warning(f"Network error for {model_name}: {e}. Retry {retry+1}/{max_net_retries} in {sleep_time}s...")
-                time.sleep(sleep_time)
+            # 检查是否是limit相关错误
+            if any(limit_err in error_str for limit_err in limit_errors):
+                if retry < max_net_retries - 1:
+                    # 指数退避：base^(retry+1)，最小1秒，最大30秒
+                    sleep_time = min(2 ** (retry + 1), 30)
+                    logger.warning(f"Limit error for {model_name}: {e}. Retry {retry+1}/{max_net_retries} in {sleep_time}s...")
+                    time.sleep(sleep_time)
+                    continue
+                else:
+                    # 重试次数耗尽，视为致命错误
+                    logger.error(f"Failed to request model {model_name} after {max_net_retries} retries due to limit error: {e}")
+                    raise e
             else:
-                logger.error(f"Failed to request model {model_name} after {max_net_retries} retries: {e}")
-                return {
-                    "model": model_name,
-                    "status": "error",
-                    "error": str(e)
-                }
+                # 所有其他错误一律视为致命错误
+                logger.error(f"Fatal error with model {model_name}: {e}")
+                raise e
     
     # 理论上不应到达这里
     return {"model": model_name, "status": "error", "error": "Max retries exceeded unknown"}
@@ -231,7 +230,7 @@ def process_setting(
     model_stats = {}
     
     for model_name in models:
-        logger.info(f"\nTesting model: {model_name}")
+        logger.info(f"\Evaluating model: {model_name}")
         
         # --- Client 初始化优化 ---
         # 在循环外初始化一次，传给所有线程

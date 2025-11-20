@@ -60,11 +60,8 @@ Respond strictly as JSON. For example:
         The agent is not aware of the repetitive action and still repeats it.
         
         # Evaluation Target
-        Here is the agent's thinking of the current step:
-        {thinking}
-
-        Here is the agent's action of the current step:
-        {action}
+        Here is the agent's current thinking and action of the current step:
+        {thinking}\n{action}
         
         # Additional contextual information:
         - The agent's interaction history with recent repetitive action: \n{kwargs.get("action_history", "")}

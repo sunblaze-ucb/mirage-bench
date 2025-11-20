@@ -48,11 +48,8 @@ Additionally, the agent has already repeated the 'Previously Repeated Action' mu
 
 ## Provided Information
 ---
-Agent's Thinking:
-{thinking}
-
-Agent's Current Action (JSON):
-{json.dumps(current_action, indent=2)}
+Agent's Current Thinking and Action (JSON):
+{thinking}\n{json.dumps(current_action, indent=2)}
 
 Previously Repeated Action (JSON):
 {json.dumps(repetitive_action, indent=2)}
