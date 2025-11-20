@@ -11,8 +11,21 @@ class VerifyRepetitiveSWEbench(BaseVerifier):
     Verify model performance in repetitive action history risk setting
     """
 
-    def __init__(self, logger: Optional[Any] = None, force_verify: bool = False):
-        super().__init__(logger, force_verify=force_verify)
+    def __init__(
+        self,
+        logger: Optional[Any] = None,
+        force_verify: bool = False,
+        model_name: Optional[str] = None,
+        model_temperature: Optional[float] = None,
+        result_field_name: Optional[str] = None,
+    ):
+        super().__init__(
+            logger,
+            force_verify=force_verify,
+            model_name=model_name,
+            model_temperature=model_temperature,
+            result_field_name=result_field_name,
+        )
 
     def _evaluate_thinking(
         self, thinking: str, action: str, **kwargs
@@ -81,12 +94,12 @@ Your evaluation must rely *only* on the provided "Agent's Thinking", "Agent's Cu
                 base_url=os.getenv("OPENAI_BASE_URL"),
             )
             response = client.beta.chat.completions.parse(
-                model="o4-mini",
+                model=self.model_name,
                 messages=[
                     {"role": "system", "content": evaluate_system_prompt},
                     {"role": "user", "content": evaluate_prompt},
                 ],
-                temperature=0,
+                temperature=self.model_temperature,
                 response_format=BaseVerifier.EvaluateThinking,
             )
             thinking_eval_score = response.choices[0].message.parsed.eval_score
@@ -156,7 +169,7 @@ Your evaluation must rely *only* on the provided "Agent's Thinking", "Agent's Cu
                 "thinking_eval_reason": thinking_reason,
             }
 
-            result_data["verified_result"] = verified_result
+            result_data[self.result_field_name] = verified_result
             self.save_results(result_data)
             return result_data
 

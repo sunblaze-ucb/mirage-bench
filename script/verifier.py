@@ -72,6 +72,27 @@ def main():
     )
 
     parser.add_argument(
+        "--verifier-model-name",
+        type=str,
+        default=None,
+        help="LLM model name used during verification (defaults to verifier-specific setting)",
+    )
+
+    parser.add_argument(
+        "--verifier-temperature",
+        type=float,
+        default=None,
+        help="Temperature used during verification (defaults to verifier-specific setting)",
+    )
+
+    parser.add_argument(
+        "--result-field-name",
+        type=str,
+        default=None,
+        help="Field name used to store verification output (defaults to 'verified_result')",
+    )
+
+    parser.add_argument(
         "--force",
         action="store_true",
         help="Force verification even if result file exists",
@@ -92,7 +113,15 @@ def main():
     output_dir = os.path.join(verify_results_dir, args.type, args.model)
     os.makedirs(output_dir, exist_ok=True)
 
-    verifier = get_verifier(args.type, args.scenario, logger, args.force)
+    verifier = get_verifier(
+        args.type,
+        args.scenario,
+        logger,
+        args.force,
+        model_name=args.verifier_model_name,
+        model_temperature=args.verifier_temperature,
+        result_field_name=args.result_field_name,
+    )
 
     # Load inference results and run verification
     verifier.load_inference_results(inference_results_path, args.scenario)
@@ -101,8 +130,9 @@ def main():
 
     # Calculate statistics
     total_files = len(verified_results)
+    result_field_name = getattr(verifier, "result_field_name", "verified_result")
     verified_count = sum(
-        1 for result in verified_results if "verified_result" in result
+        1 for result in verified_results if result_field_name in result
     )
     skipped_count = total_files - verified_count
 

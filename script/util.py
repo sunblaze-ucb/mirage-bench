@@ -221,25 +221,36 @@ def get_all_settings(
 
     return settings
 
-def get_verifier(type: str, scenario: str, logger: logging.Logger = None, force: bool = False):
+def get_verifier(
+    type: str,
+    scenario: str,
+    logger: logging.Logger = None,
+    force: bool = False,
+    model_name: Optional[str] = None,
+    model_temperature: Optional[float] = None,
+    result_field_name: Optional[str] = None,
+):
+
+    common_kwargs = dict(
+        force_verify=force,
+        model_name=model_name,
+        model_temperature=model_temperature,
+        result_field_name=result_field_name,
+    )
     if type == "unexpected_transition":
         if scenario == "theagentcompany":
             from verifier import VerifyUnexpectedTransitionTAC
 
-            verifier = VerifyUnexpectedTransitionTAC(logger, force_verify=force)
+            verifier = VerifyUnexpectedTransitionTAC(logger, **common_kwargs)
 
         elif scenario == "webarena":
             from verifier import VerifyUnexpectedTransitionWebarena
 
-            verifier = VerifyUnexpectedTransitionWebarena(
-                logger, force_verify=force
-            )
+            verifier = VerifyUnexpectedTransitionWebarena(logger, **common_kwargs)
         elif scenario == "osworld":
             from verifier import VerifyUnexpectedTransitionOSWorld
 
-            verifier = VerifyUnexpectedTransitionOSWorld(
-                logger, force_verify=force
-            )
+            verifier = VerifyUnexpectedTransitionOSWorld(logger, **common_kwargs)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
             raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
@@ -250,13 +261,13 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger = None, force:
                 VerifyUsersQuestionsTAC,
             )
 
-            verifier = VerifyUsersQuestionsTAC(logger, force_verify=force)
+            verifier = VerifyUsersQuestionsTAC(logger, **common_kwargs)
         elif scenario == "taubench":
             from verifier import (
                 VerifyUsersQuestionsTaubench,
             )
 
-            verifier = VerifyUsersQuestionsTaubench(logger, force_verify=force)
+            verifier = VerifyUsersQuestionsTaubench(logger, **common_kwargs)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
             raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
@@ -267,11 +278,11 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger = None, force:
                 VerifyMisleadingSWEbench,
             )
 
-            verifier = VerifyMisleadingSWEbench(logger, force_verify=force)
+            verifier = VerifyMisleadingSWEbench(logger, **common_kwargs)
         elif scenario == "webarena":
             from verifier import VerifyMisleadingWebarena
 
-            verifier = VerifyMisleadingWebarena(logger, force_verify=force)
+            verifier = VerifyMisleadingWebarena(logger, **common_kwargs)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
             raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
@@ -280,15 +291,15 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger = None, force:
         if scenario == "webarena" or scenario == "workarena":
             from verifier import VerifyRepetitive
 
-            verifier = VerifyRepetitive(logger, force_verify=force)
+            verifier = VerifyRepetitive(logger, **common_kwargs)
         elif scenario == "osworld":
             from verifier import VerifyRepetitiveOSWorld
 
-            verifier = VerifyRepetitiveOSWorld(logger, force_verify=force)
+            verifier = VerifyRepetitiveOSWorld(logger, **common_kwargs)
         elif scenario == "swebench":
             from verifier import VerifyRepetitiveSWEbench
 
-            verifier = VerifyRepetitiveSWEbench(logger, force_verify=force)
+            verifier = VerifyRepetitiveSWEbench(logger, **common_kwargs)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
             raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
@@ -297,7 +308,7 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger = None, force:
         if scenario == "webarena" or scenario == "osworld":
             from verifier import VerifyPopup
 
-            verifier = VerifyPopup(logger, force_verify=force)
+            verifier = VerifyPopup(logger, **common_kwargs)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
             raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
@@ -306,11 +317,11 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger = None, force:
         if scenario == "webarena":
             from verifier import VerifyUnderspecifiedWebarena
 
-            verifier = VerifyUnderspecifiedWebarena(logger, force_verify=force)
+            verifier = VerifyUnderspecifiedWebarena(logger, **common_kwargs)
         elif scenario == "osworld":
             from verifier import VerifyUnderspecifiedOSWorld
 
-            verifier = VerifyUnderspecifiedOSWorld(logger, force_verify=force)
+            verifier = VerifyUnderspecifiedOSWorld(logger, **common_kwargs)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
             raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
@@ -319,7 +330,7 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger = None, force:
         if scenario == "webarena" or scenario == "workarena":
             from verifier import VerifyUnachievableWebarena
 
-            verifier = VerifyUnachievableWebarena(logger, force_verify=force)
+            verifier = VerifyUnachievableWebarena(logger, **common_kwargs)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
             raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")
@@ -328,11 +339,11 @@ def get_verifier(type: str, scenario: str, logger: logging.Logger = None, force:
         if scenario == "webarena" or scenario == "workarena":
             from verifier import VerifyErroneousWebarena
 
-            verifier = VerifyErroneousWebarena(logger, force_verify=force)
+            verifier = VerifyErroneousWebarena(logger, **common_kwargs)
         elif scenario == "swebench":
             from verifier import VerifyErroneousSWEbench
 
-            verifier = VerifyErroneousSWEbench(logger, force_verify=force)
+            verifier = VerifyErroneousSWEbench(logger, **common_kwargs)
         else:
             logger.error(f"Unsupported scenario '{scenario}' for type '{type}'")
             raise ValueError(f"Unsupported scenario '{scenario}' for type '{type}'")

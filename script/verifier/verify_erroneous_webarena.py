@@ -15,9 +15,20 @@ class VerifyErroneousWebarena(BaseVerifier):
     """
 
     def __init__(
-        self, logger: Optional[logging.Logger] = None, force_verify: bool = False
+        self,
+        logger: Optional[logging.Logger] = None,
+        force_verify: bool = False,
+        model_name: Optional[str] = None,
+        model_temperature: Optional[float] = None,
+        result_field_name: Optional[str] = None,
     ):
-        super().__init__(logger, force_verify=force_verify)
+        super().__init__(
+            logger,
+            force_verify=force_verify,
+            model_name=model_name,
+            model_temperature=model_temperature,
+            result_field_name=result_field_name,
+        )
 
     def _evaluate_action(self, thinking: str, action: str, **kwargs) -> int:
         pass
@@ -72,12 +83,12 @@ class VerifyErroneousWebarena(BaseVerifier):
                 base_url=os.getenv("OPENAI_BASE_URL"),
             )
             response = client.beta.chat.completions.parse(
-                model="o4-mini",
+                model=self.model_name,
                 messages=[
                     {"role": "system", "content": evaluate_system_prompt},
                     {"role": "user", "content": evaluate_prompt},
                 ],
-                temperature=0,
+                temperature=self.model_temperature,
                 response_format=BaseVerifier.EvaluateThinking,
             )
 
@@ -147,7 +158,7 @@ class VerifyErroneousWebarena(BaseVerifier):
                 "thinking_eval_reason": thinking_eval_reason,
             }
 
-            result_data["verified_result"] = verified_result
+            result_data[self.result_field_name] = verified_result
             self.save_results(result_data)
             return result_data
 

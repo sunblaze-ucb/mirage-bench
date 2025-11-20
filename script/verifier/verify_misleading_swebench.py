@@ -13,9 +13,20 @@ class VerifyMisleadingSWEbench(BaseVerifier):
     """
 
     def __init__(
-        self, logger: Optional[logging.Logger] = None, force_verify: bool = False
+        self,
+        logger: Optional[logging.Logger] = None,
+        force_verify: bool = False,
+        model_name: Optional[str] = None,
+        model_temperature: Optional[float] = None,
+        result_field_name: Optional[str] = None,
     ):
-        super().__init__(logger, force_verify=force_verify)
+        super().__init__(
+            logger,
+            force_verify=force_verify,
+            model_name=model_name,
+            model_temperature=model_temperature,
+            result_field_name=result_field_name,
+        )
 
     def _evaluate_thinking(
         self, thinking: str, action: str, **kwargs
@@ -112,12 +123,12 @@ Here is the agent's thinking and action of the current step:
                 base_url=os.getenv("OPENAI_BASE_URL"),
             )
             response = client.beta.chat.completions.parse(
-                model="o4-mini",
+                model=self.model_name,
                 messages=[
                     {"role": "system", "content": evaluate_system_prompt},
                     {"role": "user", "content": evaluate_prompt},
                 ],
-                temperature=0,
+                temperature=self.model_temperature,
                 response_format=BaseVerifier.EvaluateThinking,
             )
 
@@ -170,7 +181,7 @@ Here is the agent's thinking and action of the current step:
                 goal=goal,
             )
 
-            result_data["verified_result"] = {
+            result_data[self.result_field_name] = {
                 "thinking_eval": thinking_eval_score,
                 "action_eval": action_eval_score,
                 "thinking_eval_reason": thinking_eval_reason,

@@ -12,9 +12,20 @@ class VerifyUsersQuestionsTAC(BaseVerifier):
     """
 
     def __init__(
-        self, logger: Optional[logging.Logger] = None, force_verify: bool = False
+        self,
+        logger: Optional[logging.Logger] = None,
+        force_verify: bool = False,
+        model_name: Optional[str] = None,
+        model_temperature: Optional[float] = None,
+        result_field_name: Optional[str] = None,
     ):
-        super().__init__(logger, force_verify=force_verify)
+        super().__init__(
+            logger,
+            force_verify=force_verify,
+            model_name=model_name,
+            model_temperature=model_temperature,
+            result_field_name=result_field_name,
+        )
 
     def _evaluate_thinking(
         self, thinking: str, action: str, **kwargs
@@ -74,12 +85,12 @@ Respond strictly as JSON. For example:
             )
 
             response = client.beta.chat.completions.parse(
-                model="o4-mini",
+                model=self.model_name,
                 messages=[
                     {"role": "system", "content": evaluate_system_prompt},
                     {"role": "user", "content": evaluate_prompt},
                 ],
-                temperature=0,
+                temperature=self.model_temperature,
                 response_format=BaseVerifier.EvaluateThinking,
             )
 
@@ -114,8 +125,9 @@ Respond strictly as JSON. For example:
         )
 
         response = client.chat.completions.create(
-            model="o4-mini",
+            model=self.model_name,
             messages=[{"role": "user", "content": prompt}],
+            temperature=self.model_temperature,
         )
 
         return response.choices[0].message.content
@@ -158,7 +170,7 @@ Respond strictly as JSON. For example:
                 "thinking_eval_reason": thinking_eval_reason,
             }
 
-            result_data["verified_result"] = verified_result
+            result_data[self.result_field_name] = verified_result
             self.save_results(result_data)
             return result_data
         except Exception as e:

@@ -33,8 +33,17 @@ class BaseVerifier(ABC):
         eval_score: "BaseVerifier.Score"
         eval_reason: str
 
+    DEFAULT_MODEL_NAME = "o4-mini"
+    DEFAULT_MODEL_TEMPERATURE = 0.0
+    DEFAULT_RESULT_FIELD_NAME = "verified_result"
+
     def __init__(
-        self, logger: Optional[logging.Logger] = None, force_verify: bool = False
+        self,
+        logger: Optional[logging.Logger] = None,
+        force_verify: bool = False,
+        model_name: Optional[str] = None,
+        model_temperature: Optional[float] = None,
+        result_field_name: Optional[str] = None,
     ):
         """
         Initialize the verifier.
@@ -47,6 +56,22 @@ class BaseVerifier(ABC):
         self.verified_results = []
         self.output_dir = None
         self.force_verify = force_verify
+        self.model_name = model_name or getattr(
+            self, "DEFAULT_MODEL_NAME", BaseVerifier.DEFAULT_MODEL_NAME
+        )
+        default_temp = getattr(
+            self,
+            "DEFAULT_MODEL_TEMPERATURE",
+            BaseVerifier.DEFAULT_MODEL_TEMPERATURE,
+        )
+        self.model_temperature = (
+            model_temperature if model_temperature is not None else default_temp
+        )
+        self.result_field_name = result_field_name or getattr(
+            self,
+            "DEFAULT_RESULT_FIELD_NAME",
+            BaseVerifier.DEFAULT_RESULT_FIELD_NAME,
+        )
 
         # Use provided logger or create a default one with class name
         if logger:
